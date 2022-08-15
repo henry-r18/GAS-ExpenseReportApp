@@ -1,0 +1,197 @@
+<form id="expense_report_form">
+	<!--Basic Information-->
+	<div class="container is-fluid">
+		<div class="columns">
+			<div class="column is-one-third">
+				<div class="field">
+					<label class="label">Name</label>
+					<div class="control">
+						<input class="input" type="text" placeholder="Enter full name" name="basic_information[name]" required>
+          </div>
+					</div>
+					<div class="field">
+						<label class="label">Email</label>
+						<div class="control">
+							<input class="input" type="email" placeholder="Enter email address" name="basic_information[email]" required>
+          </div>
+						</div>
+						<div class="field">
+							<label class="label">Address</label>
+							<div class="control">
+								<textarea class="textarea has-fixed-size" placeholder="Enter mailing address" name="basic_information[address]" required></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="column is-two-thirds">
+						<div class="box">
+							<label class="label">Instructions</label>
+							<div class="content">
+								<ol type="1">
+									<li>Enter your full name, work email, and mailing address.</li>
+									<li>Select the currency for the report from the dropdown. All expenses entered must
+										be denominated in the same currency. (If you have expenses in multiple
+										currencies, please either submit separate forms or convert the expenses into a
+										single currency before uploading and note the exchange in the description
+										field.)</li>
+									<li>Enter your expenses in the order they appear in the PDF of your receipts, using
+										the Add Expense and Delete Expense buttons accordingly. Double check the volume
+										and expense account selected as well as the amount entered.</li>
+									<li>Please make sure the numbers on your receipts match the numbers on this form,
+										then combine images of all your receipts into one PDF and upload it here using
+										the Upload Receipts button.</li>
+									<li>Click Submit, and wait for a confirmation message to appear. You're all set!
+									</li>
+								</ol>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr>
+			<!--Expense Details-->
+			<div class="container is-fluid">
+				<!--Select Currency Dropdown-->
+				<div class="columns">
+					<div class="column is-half">
+						<div class="field">
+							<label class="label">Select Currency</label>
+							<div class="control">
+								<div class="select">
+									<select id="currency_select" name="basic_information[report_currency]" required>
+                    <option>USD</option>
+                    <option>ILS</option>
+                    <option>CAD</option>
+                    <option>EUR</option>
+                    <option>GBP</option>
+                    <option>CHF</option>
+                  </select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--Table Control Buttons-->
+					<div class="column is-half">
+						<div class="field is-grouped is-grouped-right mt-5">
+							<p class="control">
+								<button class="button table_control is-primary is-rounded is-outlined" onclick="alterTable(1)">Add Expense</button>
+							</p>
+							<p class="control">
+								<button class="button table_control is-danger is-rounded is-outlined" id="delete_row_button" onclick="alterTable(0)" disabled>Delete Expense</button>
+							</p>
+						</div>
+					</div>
+				</div>
+				<table class="table is-fullwidth">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Date</th>
+							<th>Vendor</th>
+							<th>Description</th>
+							<th>Volume</th>
+							<th>Expense Acct.</th>
+							<th>Amount</th>
+						</tr>
+					</thead>
+					<tbody id="table_body">
+						<tr id="initial_row">
+							<td width="50px">
+								<input class="input is-static row_count expense" type="text" value="1" name="expenses[0][]" readonly>
+              </td>
+							<td>
+								<input class="input expense" type="date" name="expenses[0][]" min="2015-01-01" required>
+              </td>
+							<td>
+								<input class="input expense" type="text" placeholder="Enter vendor name" name="expenses[0][]" required>
+              </td>
+							<td>
+								<input class="input expense" type="text" placeholder="Enter expense description" name="expenses[0][]" required>
+              </td>
+							<td>
+								<div class="select is-fullwidth">
+									<select class="expense" name="expenses[0][]" required>
+                    <option selected disabled>--SELECT VOLUME--</option>
+                    <option>Vol 1</option>
+                    <option>Vol 2</option>
+                    <option>Vol 3</option>
+                    <option>Vol 4</option>
+                    <option>Vol 5</option>
+                    <option>Vol 6</option>
+                    <option>Vol 7</option>
+                    <option>Vol 8</option>
+                    <option>Vol 9</option>
+                    <option>Vol 10</option>
+                    <option>N/A</option>
+                  </select>
+								</div>
+							</td>
+							<td>
+								<div class="select is-fullwidth">
+									<select class="expense" name="expenses[0][]" required>
+                <option selected disabled>--SELECT ACCT--</option>
+                <option>Advertising</option>
+                <option>Bank charges & fees</option>
+                <option>Book orders</option>
+                <option>Conference & professional association fees</option>
+                <option>Copies and scans</option>
+                <option>Events: Advertising</option>
+                <option>Events: Food</option>
+                <option>Events: Printing</option>
+                <option>Events: Space Rental</option>
+                <option>General office</option>
+                <option>Gifts</option>
+                <option>Meals, office</option>
+                <option>Office supplies</option>
+                <option>Office technology</option>
+                <option>Postage</option>
+                <option>Printing</option>
+                <option>Professional development</option>
+                <option>Travel: Accomodations</option>
+                <option>Travel: Air</option>
+                <option>Travel: Ground transportation</option>
+                <option>Travel: Meals</option>
+              </select>
+								</div>
+							</td>
+							<td>
+								<div class="field has-addons">
+									<p class="control">
+										<a class="button is-static currency_addon">USD</a>
+									</p>
+									<p class="control">
+										<input class="input expense" type="number" step="0.01" min="0" placeholder="0.00" name="expenses[0][]:number" onblur="calculateTotal()" style="width: 125px;" required>
+              </p>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+					<tfoot>
+						<th class="has-text-right" colspan="6" scope="row">Total</th>
+						<td id="table_total">--</td>
+					</tfoot>
+				</table>
+				<hr>
+				<!--File Upload-->
+				<div class="file is-right">
+					<label class="file-label">
+        <input class="file-input" type="file" accept="application/pdf" required>
+        <span class="file-cta">
+          <span class="file-icon">
+            <i class="fa fa-upload"></i>
+          </span>
+          <span class="file-label">
+            Upload Receipts
+          </span>
+        </span>
+        <span class="file-name">
+          No file uploaded
+        </span>
+      </label>
+				</div>
+			</div>
+			<!--Form Submit-->
+			<div class="container has-text-centered">
+				<button type="submit" class="button is-medium is-primary is-center" id="submit_button">Submit</button>
+				<p id="status_message"></p>
+			</div>
+</form>

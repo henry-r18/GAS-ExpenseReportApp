@@ -1,0 +1,94 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+	integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-serializejson@3.2.1/jquery.serializejson.min.js"
+	integrity="sha256-IfgV2KWiEgB7xvdglzXFAPS6YIFJsZVdea1U7JLD49w=" crossorigin="anonymous"></script>
+
+<script>
+	//Sets max attr for date inputs on document ready
+  $( () => $(':input[type="date"]').attr( 'max', new Date().toISOString().slice(0, -14) ) );
+  //Prevents default behavior when add/delete expense buttons clicked
+  $('button.table_control').click( event => event.preventDefault() );
+  //Handles form submission and file input field
+  $('form').submit( event => {
+    event.preventDefault();
+    $('#submit_button').addClass('is-loading');
+    let serializedForm = $('form').serializeJSON({useIntKeysAsArrayIndex: true}),
+      file = $('.file-input')[0].files[0],
+      reader = new FileReader();
+    $('form :input').prop('disabled', true);
+    reader.onloadend = (event) => {
+      google.script.run
+      .withSuccessHandler( confirmSuccess )
+      .withFailureHandler( alertFailure )
+      .handleForm( 
+        JSON.stringify(serializedForm), event.target.result
+      );
+    };
+    reader.readAsDataURL(file);
+  });
+  //Displays name of uploaded file on file input change
+  $('.file-input').change( (event) => {
+    let fileInput = event.target;
+    if ( fileInput.files.length > 0 ) {
+      $('.file-name').html( fileInput.files[0].name );
+    }; 
+  });
+  //Displays selected currency on amount fields in table
+  $('#currency_select').change( () => {
+    let currency = $('#currency_select option:selected').html();
+    $('tbody').find('.currency_addon').html(currency);
+    calculateTotal();
+  });
+  //Displays success message and resets form upon success
+  function confirmSuccess() {
+    $('#status_message')
+      .addClass('is-size-3 has-text-primary')
+      .html(`Success! Your expense report has been received and will be processed.`)
+      .fadeOut(6000, () => $('#status_message').empty().show() );
+    document.getElementById("expense_report_form").reset();
+    $('form :input').prop('disabled', false);
+    $('.file-name').html( 'No file uploaded' );
+    $('tbody tr').slice(1).remove();
+    $('#submit_button').removeClass('is-loading').html('Submit New');
+  }
+  //Displays failure/try again message upon failure
+  function alertFailure(response) {
+    $('#status_message')
+      .addClass('is-size-3 has-text-danger')
+      .html(`An error occurred! Please wait a bit and try again. ${response}`)
+      .fadeOut(6000, () => $('#status_message').empty().removeClass('has-text-danger').show() );
+    $('form :input').prop('disabled', false);
+    $('#submit_button').removeClass('is-loading').html('Retry');
+  }
+  //Manages cloning of rows in table
+  function alterTable(operator) {
+    if (operator > 0) {
+      var newElement = $('#initial_row').clone().removeAttr('id');
+      $(newElement).find('.expense').val('')
+        .attr('name',`expenses[${ $('tbody tr').length }][]`);
+      $(newElement).find(':input[type="number"]')
+        .attr('name',`expenses[${ $('tbody tr').length }][]:number`);
+      $(newElement).insertAfter('tbody tr:last');
+      $(newElement).find('.row_count').val( $('tbody tr').length );
+    } else if ( $('tbody tr').length > 1 ) {
+      $('tbody tr:last').remove();
+    }
+    setDisabledPropOnDeleteRowButton();
+    calculateTotal();
+  }
+  //Calculates total from amounts in table
+  function calculateTotal() {
+    var currencySymbol = $('#currency_select option:selected').html(),
+      total = 0;
+    $(':input[type="number"]').each( (index, element) => {
+      total += Number( $(element).val() );
+    });
+    $('#table_total').html(`${currencySymbol} ${total.toFixed(2)}`);
+  }
+  //Disables Delete Expense button when only one expense
+  function setDisabledPropOnDeleteRowButton() {
+    $('tbody tr').length == 1
+      ? $('#delete_row_button').prop( "disabled", true )
+      : $('#delete_row_button').prop( "disabled", false )
+  }
+</script>
